@@ -19,4 +19,4 @@
       { "text": "Take a break.", "next": "start", "stat": { "health": -10 } }
     ]
   }
-},
+}
