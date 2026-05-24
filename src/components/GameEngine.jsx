@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import storyData from './storyData.json';
+import storyData from '../storyData.json';
+
 
 export default function Game() {
   const [nodeId, setNodeId] = useState("start");
