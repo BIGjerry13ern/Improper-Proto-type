@@ -1,38 +1,42 @@
 import React, { useState } from 'react';
-import { storyCampaign } from '../storyData';
-import { db } from '../firebase'; // Imports from the src folder
+import storyData from './storyData.json';
 
-export default function GameEngine() {
-  const [stats, setStats] = useState({
-    health: 100, health_max: 100, strength: 10, magic: 10, stealth: 10, agility: 10, charisma: 10,
-  });
-  const [currentPhase, setCurrentPhase] = useState("act_1_phase_1");
+export default function Game() {
+  const [nodeId, setNodeId] = useState("start");
+  const [stats, setStats] = useState({ credits: 0, health: 100, heat: 0 });
 
-  const node = storyCampaign[currentPhase];
+  const currentNode = storyData[nodeId];
 
   const handleChoice = (choice) => {
-    setStats((prevStats) => {
-      const newStats = { ...prevStats };
-      for (const [stat, value] of Object.entries(choice.statImpact)) {
-        newStats[stat] = (newStats[stat] || 0) + value;
-      }
-      return newStats;
-    });
-    setCurrentPhase(choice.nextPhase);
+    // Update Stats
+    if (choice.stat) {
+      setStats(prev => ({
+        ...prev,
+        credits: prev.credits + (choice.stat.credits || 0),
+        health: prev.health + (choice.stat.health || 0),
+        heat: prev.heat + (choice.stat.heat || 0)
+      }));
+    }
+    // Change Node
+    setNodeId(choice.next);
   };
 
-  if (!node) return <div>Loading...</div>;
+  if (!currentNode) return <div>Error: Node "{nodeId}" not found.</div>;
 
   return (
-    <div style={{ color: '#00FF00', padding: '20px', fontFamily: 'monospace' }}>
-      <h3>IMPROPER | HP: {stats.health}</h3>
-      <h2>{node.title}</h2>
-      <p>{node.text}</p>
-      {node.choices.map((choice, index) => (
-        <button key={index} onClick={() => handleChoice(choice)}>
-          {choice.text}
-        </button>
-      ))}
+    <div style={{ padding: '20px', backgroundColor: '#111', color: '#0f0', minHeight: '100vh' }}>
+      <h1>{currentNode.title}</h1>
+      <p>{currentNode.text}</p>
+      <div style={{ marginTop: '20px' }}>
+        {currentNode.choices.map((c, i) => (
+          <button key={i} onClick={() => handleChoice(c)} style={{ display: 'block', margin: '10px 0' }}>
+            {c.text}
+          </button>
+        ))}
+      </div>
+      <div style={{ marginTop: '50px', borderTop: '1px solid #333' }}>
+        <p>Credits: {stats.credits} | Health: {stats.health} | Heat: {stats.heat}</p>
+      </div>
     </div>
   );
 }
